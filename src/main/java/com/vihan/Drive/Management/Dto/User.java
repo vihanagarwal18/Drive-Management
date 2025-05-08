@@ -1,8 +1,6 @@
 package com.vihan.Drive.Management.Dto;
 
-import com.vihan.Drive.Management.Constants.FileType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -13,20 +11,18 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Builder
-public class File {
+public class User {
 
     private String id;
 
+    private LoginDetails loginDetails;
+
     private String name;
 
-    private FileType fileType;
+    private String email;
 
-    private User user;
+    private String phoneNumber;
 
-    private String displayName;
+    private String address;
 
-    private String internalPath;
-
-    private String externalPath;
 }
