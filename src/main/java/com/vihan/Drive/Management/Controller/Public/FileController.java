@@ -32,7 +32,7 @@ public class FileController {
                 @RequestHeader(value = "internalPath") String internalPath,
                 @RequestHeader(value = "externalPath") String externalPath) {
 
-            return fileService.getFileById(id, userId, displayName,fileType,internalPath,externalPath);
+            return fileService.getFile(id, userId, displayName, fileType, internalPath, externalPath);
     }
 
     @PostMapping(value = "/file/{userId}/{id}")
@@ -44,18 +44,19 @@ public class FileController {
                 @RequestHeader(value = "internalPath") String internalPath,
                 @RequestHeader(value = "externalPath") String externalPath) {
 
-            return fileService.createFile(id, userId, displayName,fileType,internalPath,externalPath);
+            return fileService.createFile(id, userId, displayName, fileType, internalPath, externalPath);
     }
 
     @PutMapping(value = "/file/rename/{userId}/{id}")
     public RenameResponseDto renameFile(
                 @PathVariable(value = "id") String id,
                 @PathVariable(value = "userId") String userId,
+                @RequestParam(value = "oldName") String oldName,
                 @RequestParam(value = "newName") String newName,
                 @RequestHeader(value = "fileType") FileType fileType,
                 @RequestHeader(value = "internalPath") String internalPath,
                 @RequestHeader(value = "externalPath") String externalPath) {
 
-            return fileService.renameFile(id, userId, newName,fileType,internalPath,externalPath);
+            return fileService.renameFile(id, userId, oldName, newName, fileType, internalPath, externalPath);
     }
 }
