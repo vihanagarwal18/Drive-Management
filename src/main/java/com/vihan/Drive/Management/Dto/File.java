@@ -5,12 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Getter
 @Setter
 @Builder
@@ -29,4 +29,8 @@ public class File {
     private String internalPath;
 
     private String externalPath;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }

@@ -3,13 +3,19 @@ package com.vihan.Drive.Management.Service.Impl;
 import com.vihan.Drive.Management.Constants.FileType;
 import com.vihan.Drive.Management.Dto.File;
 import com.vihan.Drive.Management.Dto.RenameResponseDto;
-import com.vihan.Drive.Management.Dto.User;
+import com.vihan.Drive.Management.Entity.FileModel;
+import com.vihan.Drive.Management.Entity.UserModel;
+import com.vihan.Drive.Management.Mapper.FileMapper;
+import com.vihan.Drive.Management.Mapper.UserMapper;
 import com.vihan.Drive.Management.Repository.FileRepository;
 import com.vihan.Drive.Management.Repository.UserRepository;
 import com.vihan.Drive.Management.Service.Interface.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -18,50 +24,73 @@ public class FileServiceImpl implements FileService {
 
     private final FileRepository fileRepository;
     private final UserRepository userRepository;
+    private final FileMapper fileMapper = FileMapper.INSTANCE;
+    private final UserMapper userMapper = UserMapper.INSTANCE;
 
     @Override
-    public File getFile(String id, String userId,String displayName, FileType fileType,
-            String internalPath, String externalPath)  {
+    @Transactional(readOnly = true)
+    public File getFile(String id, String userId, String displayName, FileType fileType,
+                        String internalPath, String externalPath) {
 
-        User user=userRepository.getUser(userId);
-        String userName=user.getLoginDetails().username();
+        UserModel userModel = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        String userName = userModel.getLoginDetails().getUsername();
 
-        return fileRepository.getFile(id, userName, displayName, fileType, internalPath, externalPath);
+        FileModel fileModel = fileRepository.findFileByAttributes(id, userName, displayName, fileType, internalPath, externalPath);
+        if (fileModel == null) {
+            throw new IllegalArgumentException("File not found with given attributes");
+        }
+        
+        return fileMapper.fileModelToFile(fileModel);
     }
 
     @Override
-    public File createFile(String id, String userId,String displayName, FileType fileType,
-            String internalPath, String externalPath)  {
+    @Transactional
+    public File createFile(String id, String userId, String displayName, FileType fileType,
+                           String internalPath, String externalPath) {
 
-        User user=userRepository.getUser(userId);
-        String userName=user.getLoginDetails().username();
+        UserModel userModel = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        String userName = userModel.getLoginDetails().getUsername();
 
-        File file=fileRepository.getFile(id, userName, displayName, fileType, internalPath, externalPath);
-        //make repository call to create file
-        //for now returning a dummy file
-        //find user with user id
-        return File.builder().
-                id(id).
-                displayName(displayName).
-                fileType(fileType).
-                internalPath(internalPath).
-                externalPath(externalPath).
-                build();
+        FileModel fileModel = FileModel.builder()
+                .id(id)
+                .name(displayName)
+                .userName(userName)
+                .displayName(displayName)
+                .fileType(fileType)
+                .user(userModel)
+                .internalPath(internalPath)
+                .externalPath(externalPath)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        fileModel = fileRepository.save(fileModel);
+        return fileMapper.fileModelToFile(fileModel);
     }
 
+    @Override
+    @Transactional
     public RenameResponseDto renameFile(String id, String userId, String oldName, String newName, FileType fileType,
-                                        String internalPath, String externalPath){
+                                        String internalPath, String externalPath) {
 
-        User user=userRepository.getUser(userId);
-        String userName=user.getLoginDetails().username();
+        UserModel userModel = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        String userName = userModel.getLoginDetails().getUsername();
 
-        File file=fileRepository.getFile(id, userName, oldName, fileType, internalPath, externalPath);
+        FileModel fileModel = fileRepository.findFileByAttributes(id, userName, oldName, fileType, internalPath, externalPath);
+        if (fileModel == null) {
+            throw new IllegalArgumentException("File not found with given attributes");
+        }
 
-        renameFile(file, newName);
+        fileModel.setDisplayName(newName);
+        fileModel.setUpdatedAt(LocalDateTime.now());
+        fileRepository.save(fileModel);
 
         return RenameResponseDto.builder()
                 .fileName(newName)
-                .userName(userId)
+                .userName(userName)
                 .oldName(oldName)
                 .newName(newName)
                 .fileType(fileType)
@@ -70,17 +99,19 @@ public class FileServiceImpl implements FileService {
                 .build();
     }
 
-    private void renameFile(File file, String newName) {
-        file.setName(newName);
-        //make repository call to save renamed file
-    }
+    @Override
+    @Transactional
+    public void deleteFile(String id, String userId, String displayName, FileType fileType,
+                          String internalPath, String externalPath) {
+        UserModel userModel = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        String userName = userModel.getLoginDetails().getUsername();
 
-    private void deleteFile(File file) {
-        //make repository call to soft  delete file
-    }
+        FileModel fileModel = fileRepository.findFileByAttributes(id, userName, displayName, fileType, internalPath, externalPath);
+        if (fileModel == null) {
+            throw new IllegalArgumentException("File not found with given attributes");
+        }
 
-    private void createFile(File file) {
-        //make repository call to create file
+        fileRepository.delete(fileModel);
     }
 }
-

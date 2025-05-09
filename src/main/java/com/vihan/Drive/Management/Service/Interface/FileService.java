@@ -12,6 +12,9 @@ public interface FileService {
     File createFile(String id, String userId, String displayName, FileType fileType,
             String internalPath, String externalPath);
 
-    RenameResponseDto renameFile(String id, String userId, String displayName, String newName, FileType fileType,
+    RenameResponseDto renameFile(String id, String userId, String oldName, String newName, FileType fileType,
+            String internalPath, String externalPath);
+
+    void deleteFile(String id, String userId, String displayName, FileType fileType,
             String internalPath, String externalPath);
 }
