@@ -1,0 +1,14 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# these users will be requested for review when someone 
+# opens a pull request.
+*       @vihan.agarwal @vihanagarwal18 @gauransh18
+
+# Java source files
+src/main/java/com/vihan/Drive/Management/**/*.java    @vihan.agarwal @vihanagarwal18 @gauransh18
+
+# Service layer specific files
+src/main/java/com/vihan/Drive/Management/Service/**/*    @vihan.agarwal @vihanagarwal18 @gauransh18
+
+# Test files
+src/test/**/*    @vihan.agarwal @vihanagarwal18 @gauransh18 
