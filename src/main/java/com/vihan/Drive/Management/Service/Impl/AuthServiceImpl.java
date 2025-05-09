@@ -1,7 +1,7 @@
 package com.vihan.Drive.Management.Service.Impl;
 
-import com.vihan.Drive.Management.Dto.AuthUser;
-import com.vihan.Drive.Management.Dto.User;
+import com.vihan.Drive.Management.Entity.AuthUserModel;
+import com.vihan.Drive.Management.Entity.UserModel;
 import com.vihan.Drive.Management.Repository.AuthRepository;
 import com.vihan.Drive.Management.Repository.UserRepository;
 import com.vihan.Drive.Management.Service.Interface.AuthService;
@@ -10,6 +10,7 @@ import com.vihan.Drive.Management.Service.Interface.EncryptService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,70 +22,80 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
-
     private final EncryptService encryptService;
     private final DecryptService decryptService;
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isAuthenticated(String passwordEntered, String userId) {
+        UserModel user = userRepository.findById(userId)
+                .orElse(null);
 
-        User user=userRepository.getUser(userId);
-        AuthUser authUser=authRepository.getAuthUser(user);
-
-        try {
-            String decryptedPassword=decryptService.decrypt(passwordEntered, user.getDecryptionKey());
-            String encryptedPassword=encryptService.encrypt(authUser.getEncryptedPassword(), user.getEncryptionKey());
-            return encryptedPassword.equals(decryptedPassword);
-
-        } catch (Exception e) {
-            log.error("Authentication Failed or Not Authenticated", e);
-            throw new RuntimeException(e);
+        if(user == null) {
+            throw new RuntimeException("User not found: " + userId);
+        }
+                
+        AuthUserModel authUser = authRepository.findByUser(user)
+                .orElse(null);
+        if (authUser == null) {
+            throw new RuntimeException("Auth user not found for user: " + userId);
         }
 
+        try {
+            String decryptedPassword = decryptService.decrypt(passwordEntered, user.getDecryptionKey());
+            String encryptedPassword = encryptService.encrypt(authUser.getEncryptedPassword(), user.getEncryptionKey());
+            return encryptedPassword.equals(decryptedPassword);
+        } catch (Exception e) {
+            log.error("Authentication failed for user: " + userId, e);
+            throw new RuntimeException("Authentication failed", e);
+        }
     }
 
     @Override
-    public List<String> generateKey(User user) {
-        //id needs to be unique hash
-        AuthUser authUser=AuthUser.builder()
-                .id("123")
-                .user(user)
-                .decryptionKey(generateDecryptionKey())
-                .encryptionKey(generateEncryptionKey())
-                .build();
+    @Transactional
+    public List<String> generateKey(UserModel user) {
+        // Generate encryption and decryption keys
+        String encryptionKey = generateEncryptionKey();
+        String decryptionKey = generateDecryptionKey();
 
-        user.setEncryptionKey(authUser.getEncryptionKey());
-        user.setDecryptionKey(authUser.getDecryptionKey());
+        try {
+            AuthUserModel authUser = AuthUserModel.builder()
+                    .user(user)
+                    .encryptionKey(encryptionKey)
+                    .decryptionKey(decryptionKey)
+                    .encryptedPassword(encryptService.encrypt(user.getLoginDetails().getPassword(), encryptionKey))
+                    .build();
 
-        //save user
-//        userRepository.save(user);
-        //save authUser
-//        authRepository.save(authUser);
+            // Set keys in user model
+            user.setEncryptionKey(encryptionKey);
+            user.setDecryptionKey(decryptionKey);
 
-        return List.of(authUser.getEncryptionKey(), authUser.getDecryptionKey());
+            // Save both entities
+            userRepository.save(user);
+            authRepository.save(authUser);
+
+            return List.of(encryptionKey, decryptionKey);
+        } catch (Exception e) {
+            log.error("Error generating keys for user: " + user.getId(), e);
+            throw new RuntimeException("Failed to generate keys", e);
+        }
     }
 
     private String generateDecryptionKey() {
-
-        UUID uniqueId = UUID.randomUUID();
-
-        //as a precaution to avoid collision
-        while(!authRepository.checkDuplicateDecryptionKey(uniqueId.toString())) {
-            uniqueId = UUID.randomUUID();
-        }
-
-        return uniqueId.toString();
-
+        String key;
+        do {
+            key = UUID.randomUUID().toString();
+        } while (authRepository.existsByDecryptionKey(key));
+        
+        return key;
     }
 
     private String generateEncryptionKey() {
-        UUID uniqueId = UUID.randomUUID();
-
-        //as a precaution to avoid collision
-        while(!authRepository.checkDuplicateEncryptionKey(uniqueId.toString())) {
-            uniqueId = UUID.randomUUID();
-        }
-
-        return uniqueId.toString();
+        String key;
+        do {
+            key = UUID.randomUUID().toString();
+        } while (authRepository.existsByEncryptionKey(key));
+        
+        return key;
     }
 }
