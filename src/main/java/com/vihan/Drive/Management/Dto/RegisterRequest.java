@@ -2,20 +2,18 @@ package com.vihan.Drive.Management.Dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@Builder
-public class User {
+public class RegisterRequest {
 
-    private String id;
+    private String username;
 
-    private LoginDetails loginDetails;
+    private String password;
 
     private String name;
 
@@ -24,8 +22,4 @@ public class User {
     private String phoneNumber;
 
     private String address;
-
-    private String encryptionKey;
-
-    private String decryptionKey;
 }
