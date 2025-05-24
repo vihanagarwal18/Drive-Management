@@ -6,14 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class User {
+public class RegisterRequest {
 
-    private String id;
+    private String username;
 
-    private LoginDetails loginDetails;
+    private String password;
 
     private String name;
 
@@ -22,8 +22,4 @@ public class User {
     private String phoneNumber;
 
     private String address;
-
-    private String encryptionKey;
-
-    private String decryptionKey;
 }

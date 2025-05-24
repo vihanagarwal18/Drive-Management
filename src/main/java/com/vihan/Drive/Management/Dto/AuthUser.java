@@ -1,13 +1,9 @@
 package com.vihan.Drive.Management.Dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
-@AllArgsConstructor
-@RequiredArgsConstructor
-@Getter
+@Value
 @Builder
 public class AuthUser {
 
