@@ -6,19 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO for authentication requests with specified authentication type
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponse {
-
-    private String token;
-
-    private String userId;
-
+public class AuthTypeRequest {
     private String username;
-
-    private String message;
-    
+    private String password;
     private AuthType authType;
+    private String clientCertificate;
+    private String digestNonce;
 }

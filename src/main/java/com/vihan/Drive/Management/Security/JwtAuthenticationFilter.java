@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final CookieUtil cookieUtil;
 
     @Value("${jwt.header}")
     private String headerName;
@@ -32,13 +34,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        final String authorizationHeader = request.getHeader(headerName);
-
+        // Try to get token from header first
+        String jwt = getJwtFromHeader(request);
+        
+        // If not found in header, try to get from cookie
+        if (jwt == null) {
+            jwt = cookieUtil.getTokenFromCookie(request);
+        }
+        
         String userId = null;
-        String jwt = null;
-
-        if (authorizationHeader != null && authorizationHeader.startsWith(tokenPrefix)) {
-            jwt = authorizationHeader.substring(tokenPrefix.length());
+        
+        if (StringUtils.hasText(jwt)) {
             userId = jwtUtil.extractUsername(jwt);
         }
 
@@ -54,5 +60,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         
         filterChain.doFilter(request, response);
+    }
+    
+    /**
+     * Extract JWT token from Authorization header
+     */
+    private String getJwtFromHeader(HttpServletRequest request) {
+        final String authorizationHeader = request.getHeader(headerName);
+        
+        if (authorizationHeader != null && authorizationHeader.startsWith(tokenPrefix)) {
+            return authorizationHeader.substring(tokenPrefix.length());
+        }
+        
+        return null;
     }
 }

@@ -11,7 +11,7 @@ public interface AuthService {
 
     boolean isAuthenticated(String passwordEntered, String userId);
 
-    List<String> generateKey(User user);
+//    List<String> generateKey(User user);
     
     AuthResponse login(AuthRequest request);
     

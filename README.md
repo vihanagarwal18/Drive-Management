@@ -56,23 +56,66 @@ The Drive Management System uses JWT (JSON Web Token) for authentication and aut
        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
        "userId": "550e8400-e29b-41d4-a716-446655440000",
        "username": "user1",
-       "message": "Login successful"
+       "message": "Login successful",
+       "authType": "FORM"
      }
      ```
    - **Description**: Authenticates a user and returns a JWT token for accessing protected resources.
 
+3. **Login with Authentication Type**
+   - **URL**: `/internal/v1/auth/login/auth-type`
+   - **Method**: POST
+   - **Request Payload**:
+     ```json
+     {
+       "username": "user1",
+       "password": "password123",
+       "authType": "BASIC_AUTH",
+       "clientCertificate": null,
+       "digestNonce": null
+     }
+     ```
+   - **Authentication Types**:
+     - `BASIC_AUTH`: Basic authentication
+     - `FORM_AUTH`: Form-based authentication (default)
+     - `CLIENT_CERT_AUTH`: Client certificate authentication
+     - `DIGEST_AUTH`: Digest authentication
+   - **Response**:
+     ```json
+     {
+       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+       "userId": "550e8400-e29b-41d4-a716-446655440000",
+       "username": "user1",
+       "message": "Login successful",
+       "authType": "BASIC_AUTH"
+     }
+     ```
+   - **Description**: Authenticates a user using the specified authentication type and returns a JWT token.
+
 3. **Validate Token**
    - **URL**: `/internal/v1/auth/validate`
    - **Method**: GET
-   - **Headers**:
+   - **Headers** (optional if using cookies):
      ```
      Authorization: Bearer <token>
      ```
+   - **Cookies** (optional if using headers):
+     ```
+     jwt-token=<token>
+     ```
    - **Response**:
+     ```json
+     {
+       "userId": "550e8400-e29b-41d4-a716-446655440000",
+       "username": "user1",
+       "valid": true,
+       "expirationTime": "2023-06-01T12:00:00Z",
+       "roles": ["ROLE_USER"],
+       "issuedFromCookie": true,
+       "authType": "FORM_AUTH"
+     }
      ```
-     "Token is valid"
-     ```
-   - **Description**: Validates if the provided JWT token is valid and not expired.
+   - **Description**: Validates the JWT token (from either header or cookie) and returns detailed information about the token and the authenticated user.
 
 4. **Authenticate with Password**
    - **URL**: `/internal/v1/auth/authenticate/{passwordEntered}/{userId}`
@@ -134,6 +177,105 @@ The system provides detailed error responses for various scenarios:
 3. **Data Encryption**: Sensitive data is encrypted using AES-256
 4. **Unique Keys**: Each user has unique encryption and decryption keys
 5. **Token Expiration**: JWT tokens expire after a configurable time period
+6. **HTTP-Only Cookies**: JWT tokens are stored in HTTP-only cookies to prevent XSS attacks
+7. **Refresh Tokens**: Long-lived refresh tokens for session management
+
+## Session Management
+
+The Drive Management System implements a robust session management system using JWT tokens stored in HTTP-only cookies alongside refresh tokens. This approach combines the benefits of JWT tokens (stateless authentication) with the security advantages of cookies (protection against XSS attacks).
+
+### Key Features
+
+1. **HTTP-Only Cookies for JWT Storage**
+   - JWT tokens are stored in secure, HTTP-only cookies
+   - Prevents JavaScript access to tokens, protecting against XSS attacks
+   - Automatic token transmission with every request
+
+2. **Refresh Token System**
+   - Long-lived refresh tokens (7 days by default)
+   - Stored in both cookies and database
+   - Token rotation on refresh for enhanced security
+   - Automatic token revocation on logout
+
+3. **Dual Authentication Strategy**
+   - JWT tokens are checked in both Authorization header and cookies
+   - Maintains backward compatibility with existing clients
+   - Seamless authentication flow for web applications
+
+4. **Enhanced Security**
+   - Configurable cookie settings (secure, HTTP-only, domain, path)
+   - Database tracking of refresh tokens
+   - Scheduled cleanup of expired tokens
+   - Protection against common web vulnerabilities
+
+### Benefits
+
+This implementation provides several advantages:
+
+1. **Better Security**: HTTP-only cookies protect tokens from JavaScript access
+2. **Improved User Experience**: Automatic session management without client-side token storage
+3. **Stateful Sessions**: Ability to track and revoke sessions when needed
+4. **Cross-Site Request Protection**: Cookies can be configured with SameSite attributes
+
+### JWT Token and Refresh Token Flow
+
+1. **Login/Registration**: When a user logs in or registers, the system:
+   - Generates a short-lived JWT token (24 hours by default)
+   - Generates a long-lived refresh token (7 days by default)
+   - Stores both tokens in HTTP-only cookies
+   - Stores the refresh token in the database
+
+2. **Authentication**: For each request:
+   - The system checks for a JWT token in the Authorization header
+   - If not found, it checks for a JWT token in the HTTP-only cookie
+   - If the token is valid, the request is processed
+   - If the token is expired or invalid, the request is rejected
+
+3. **Token Refresh**: When the JWT token expires:
+   - The client can call the refresh endpoint
+   - The system validates the refresh token from the cookie
+   - If valid, it generates a new JWT token and refresh token
+   - The old refresh token is revoked
+   - The new tokens are stored in HTTP-only cookies
+
+4. **Logout**: When a user logs out:
+   - The refresh token is deleted from the database
+   - The cookies are cleared
+
+### Session Endpoints
+
+1. **Refresh Token**
+   - **URL**: `/internal/v1/auth/refresh`
+   - **Method**: POST
+   - **Cookies Required**: `jwt-refresh-token`
+   - **Response**:
+     ```json
+     {
+       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+       "userId": "550e8400-e29b-41d4-a716-446655440000",
+       "username": "user1",
+       "message": "Token refreshed successfully"
+     }
+     ```
+   - **Description**: Refreshes the JWT token using the refresh token stored in the cookie.
+
+2. **Logout**
+   - **URL**: `/internal/v1/auth/logout`
+   - **Method**: POST
+   - **Cookies Required**: `jwt-refresh-token` (optional)
+   - **Response**: `"Logged out successfully"`
+   - **Description**: Logs out the user by revoking the refresh token and clearing cookies.
+
+### Cookie Security
+
+The system uses HTTP-only cookies with the following security features:
+
+1. **HTTP-Only**: Prevents JavaScript from accessing the cookie, protecting against XSS attacks
+2. **Secure** (in production): Ensures cookies are only sent over HTTPS
+3. **SameSite**: Protects against CSRF attacks
+4. **Path**: Restricts the cookie to specific paths
+5. **Domain**: Restricts the cookie to specific domains
+6. **Max-Age**: Sets the expiration time for the cookie
 
 ## File Management
 

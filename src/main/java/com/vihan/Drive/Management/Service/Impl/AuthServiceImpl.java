@@ -59,33 +59,33 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    @Override
-    @Transactional
-    public List<String> generateKey(User user) {
-
-        String uniqueId = UUID.randomUUID().toString();
-
-        UserModel userModel = UserMapper.INSTANCE.toEntity(user);
-
-        String encryptionKey = generateEncryptionKey();
-        String decryptionKey = generateDecryptionKey();
-
-        userModel.setEncryptionKey(encryptionKey);
-        userModel.setDecryptionKey(decryptionKey);
-
-        AuthUserModel authUserModel = AuthUserModel.builder()
-                .id(uniqueId)
-                .user(userModel)
-                .encryptionKey(encryptionKey)
-                .decryptionKey(decryptionKey)
-                .encryptedPassword(passwordService.encryptPassword(user.getLoginDetails().password()))
-                .build();
-
-        userRepository.save(userModel);
-        authRepository.save(authUserModel);
-
-        return List.of(encryptionKey, decryptionKey);
-    }
+//    @Override
+//    @Transactional
+//    public List<String> generateKey(User user) {
+//
+//        String uniqueId = UUID.randomUUID().toString();
+//
+//        UserModel userModel = UserMapper.INSTANCE.toEntity(user);
+//
+//        String encryptionKey = generateEncryptionKey();
+//        String decryptionKey = generateDecryptionKey();
+//
+//        userModel.setEncryptionKey(encryptionKey);
+//        userModel.setDecryptionKey(decryptionKey);
+//
+//        AuthUserModel authUserModel = AuthUserModel.builder()
+//                .id(uniqueId)
+//                .user(userModel)
+//                .encryptionKey(encryptionKey)
+//                .decryptionKey(decryptionKey)
+//                .encryptedPassword(passwordService.encryptPassword(user.getLoginDetails().password()))
+//                .build();
+//
+//        userRepository.save(userModel);
+//        authRepository.save(authUserModel);
+//
+//        return List.of(encryptionKey, decryptionKey);
+//    }
 
     @Override
     @Transactional
