@@ -134,3 +134,223 @@ The system provides detailed error responses for various scenarios:
 3. **Data Encryption**: Sensitive data is encrypted using AES-256
 4. **Unique Keys**: Each user has unique encryption and decryption keys
 5. **Token Expiration**: JWT tokens expire after a configurable time period
+
+## File Management
+
+The Drive Management System provides comprehensive file management capabilities, with files stored in AWS S3 and metadata stored in PostgreSQL.
+
+### File Management Endpoints
+
+All file endpoints require authentication with a valid JWT token in the Authorization header.
+
+#### 1. Get File
+
+- **URL**: `/public/v1/file/{userId}/{id}`
+- **Method**: GET
+- **Path Variables**:
+  - `userId`: The ID of the user who owns the file
+  - `id`: The ID of the file to retrieve
+- **Request Parameters**:
+  - `displayName`: The display name of the file
+- **Request Headers**:
+  - `fileType`: The type of file (IMAGE, PDF, WORD, EXCEL, POWERPOINT, TEXT, AUDIO, VIDEO)
+  - `internalPath`: The internal path of the file
+  - `externalPath`: The external path of the file
+- **Response**: File object
+  ```json
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "document.pdf",
+    "displayName": "My Document",
+    "fileType": "PDF",
+    "internalPath": "/documents",
+    "externalPath": "/user/documents",
+    "s3Key": "user-id/documents/uuid-document.pdf",
+    "contentType": "application/pdf",
+    "size": 1024000,
+    "isPublic": false
+  }
+  ```
+- **Description**: Retrieves metadata for a specific file.
+
+#### 2. Create File
+
+- **URL**: `/public/v1/file/{userId}/{id}`
+- **Method**: POST
+- **Path Variables**:
+  - `userId`: The ID of the user who will own the file
+  - `id`: The ID to assign to the file (optional, will generate UUID if not provided)
+- **Request Parameters**:
+  - `displayName`: The display name of the file
+- **Request Headers**:
+  - `fileType`: The type of file (IMAGE, PDF, WORD, EXCEL, POWERPOINT, TEXT, AUDIO, VIDEO)
+  - `internalPath`: The internal path of the file
+  - `externalPath`: The external path of the file
+- **Response**: File object (same format as Get File)
+- **Description**: Creates a new file metadata entry without uploading actual file content.
+
+#### 3. Rename File
+
+- **URL**: `/public/v1/file/rename/{userId}/{id}`
+- **Method**: PUT
+- **Path Variables**:
+  - `userId`: The ID of the user who owns the file
+  - `id`: The ID of the file to rename
+- **Request Parameters**:
+  - `oldName`: The current name of the file
+  - `newName`: The new name for the file
+- **Request Headers**:
+  - `fileType`: The type of file
+  - `internalPath`: The internal path of the file
+  - `externalPath`: The external path of the file
+- **Response**:
+  ```json
+  {
+    "fileName": "new-document-name.pdf",
+    "userName": "550e8400-e29b-41d4-a716-446655440000",
+    "oldName": "document.pdf",
+    "newName": "new-document-name.pdf",
+    "fileType": "PDF",
+    "internalPath": "/documents",
+    "externalPath": "/user/documents"
+  }
+  ```
+- **Description**: Renames a file.
+
+#### 4. Upload File
+
+- **URL**: `/public/v1/file/upload/{userId}`
+- **Method**: POST
+- **Path Variables**:
+  - `userId`: The ID of the user who will own the file
+- **Request Parameters**:
+  - `file`: The multipart file to upload
+  - `folderPath`: The folder path to store the file (default: empty string)
+  - `displayName`: The display name of the file (optional, uses original filename if not provided)
+  - `isPublic`: Whether the file is publicly accessible (default: false)
+- **Request Headers**:
+  - `fileType`: The type of file (IMAGE, PDF, WORD, EXCEL, POWERPOINT, TEXT, AUDIO, VIDEO)
+- **Response**: File object (same format as Get File)
+- **Description**: Uploads a file to S3 and stores its metadata in the database.
+
+#### 5. Download File
+
+- **URL**: `/public/v1/file/download/{userId}/{id}`
+- **Method**: GET
+- **Path Variables**:
+  - `userId`: The ID of the user who owns the file
+  - `id`: The ID of the file to download
+- **Response**: Binary file content with appropriate content type and attachment headers
+- **Description**: Downloads a file from S3.
+
+#### 6. Delete File
+
+- **URL**: `/public/v1/file/{userId}/{id}`
+- **Method**: DELETE
+- **Path Variables**:
+  - `userId`: The ID of the user who owns the file
+  - `id`: The ID of the file to delete
+- **Response**: Boolean (true if deletion was successful)
+- **Description**: Deletes a file from S3 and removes its metadata from the database.
+
+#### 7. List Files
+
+- **URL**: `/public/v1/files/{userId}`
+- **Method**: GET
+- **Path Variables**:
+  - `userId`: The ID of the user whose files to list
+- **Request Parameters**:
+  - `folderPath`: The folder path to filter files by (optional)
+- **Response**: Array of File objects
+  ```json
+  [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "document1.pdf",
+      "displayName": "My Document 1",
+      "fileType": "PDF",
+      "internalPath": "/documents",
+      "externalPath": "/user/documents",
+      "s3Key": "user-id/documents/uuid-document1.pdf",
+      "contentType": "application/pdf",
+      "size": 1024000,
+      "isPublic": false
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "name": "image1.jpg",
+      "displayName": "My Image 1",
+      "fileType": "IMAGE",
+      "internalPath": "/images",
+      "externalPath": "/user/images",
+      "s3Key": "user-id/images/uuid-image1.jpg",
+      "contentType": "image/jpeg",
+      "size": 2048000,
+      "isPublic": true
+    }
+  ]
+  ```
+- **Description**: Lists all files for a user, optionally filtered by folder path.
+
+### File Error Responses
+
+The system provides detailed error responses for file operations:
+
+1. **File Not Found**:
+   ```json
+   {
+     "code": "FILE_NOT_FOUND",
+     "message": "File not found"
+   }
+   ```
+
+2. **User Not Found**:
+   ```json
+   {
+     "code": "USER_NOT_FOUND",
+     "message": "User not found with id: 550e8400-e29b-41d4-a716-446655440000"
+   }
+   ```
+
+3. **Upload Failed**:
+   ```json
+   {
+     "code": "UPLOAD_FAILED",
+     "message": "Failed to upload file"
+   }
+   ```
+
+4. **File Too Large**:
+   ```json
+   {
+     "code": "FILE_TOO_LARGE",
+     "message": "The uploaded file exceeds the maximum allowed size"
+   }
+   ```
+
+5. **S3 File Not Found**:
+   ```json
+   {
+     "code": "S3_FILE_NOT_FOUND",
+     "message": "File not found in S3"
+   }
+   ```
+
+## File Storage
+
+Files are stored in AWS S3 with the following structure:
+- S3 Key Format: `{userId}/{folderPath}/{uniqueId}-{originalFileName}`
+- Example: `550e8400-e29b-41d4-a716-446655440000/documents/123e4567-e89b-12d3-a456-426614174000-document.pdf`
+
+File metadata is stored in PostgreSQL, including:
+- File ID
+- Original name
+- Display name
+- File type
+- Internal path
+- External path
+- S3 key
+- Content type
+- File size
+- Public/private status
+- User reference

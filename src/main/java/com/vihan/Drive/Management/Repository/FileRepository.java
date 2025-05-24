@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,4 +27,14 @@ public interface FileRepository extends JpaRepository<FileModel, String> {
             @Param("fileType") FileType fileType,
             @Param("internalPath") String internalPath,
             @Param("externalPath") String externalPath);
+
+    List<FileModel> findByUser(UserModel user);
+
+    List<FileModel> findByUserAndInternalPath(UserModel user, String internalPath);
+
+    List<FileModel> findByUserAndFileType(UserModel user, FileType fileType);
+
+    List<FileModel> findByUserAndInternalPathAndFileType(UserModel user, String internalPath, FileType fileType);
+
+    Optional<FileModel> findByS3Key(String s3Key);
 }

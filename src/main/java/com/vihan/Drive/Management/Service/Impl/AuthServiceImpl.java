@@ -39,8 +39,6 @@ public class AuthServiceImpl implements AuthService {
     private final DecryptService decryptService;
     private final JwtUtil jwtUtil;
     private final PasswordService passwordService;
-    private final UserMapper userMapper;
-    private final AuthUserMapper authUserMapper;
     private final CryptoUtil cryptoUtil;
 
     @Override
@@ -67,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
 
         String uniqueId = UUID.randomUUID().toString();
 
-        UserModel userModel = userMapper.toEntity(user);
+        UserModel userModel = UserMapper.INSTANCE.toEntity(user);
 
         String encryptionKey = generateEncryptionKey();
         String decryptionKey = generateDecryptionKey();
@@ -130,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new RuntimeException("Email already exists");
             }
 
-            UserModel userModel = userMapper.registerRequestToEntity(request);
+            UserModel userModel = UserMapper.INSTANCE.registerRequestToEntity(request);
 
             String encryptionKey = generateEncryptionKey();
             String decryptionKey = generateDecryptionKey();

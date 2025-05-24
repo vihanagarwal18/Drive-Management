@@ -79,4 +79,16 @@ public class FileModel {
     @Size(max = 1024, message = "External path cannot exceed 1024 characters")
     @Column(name = "external_path", length = 1024)
     private String externalPath;
+    
+    @Column(name = "s3_key", length = 1024)
+    private String s3Key;
+    
+    @Column(name = "content_type", length = 100)
+    private String contentType;
+    
+    @Column(name = "size")
+    private Long size;
+    
+    @Column(name = "is_public")
+    private Boolean isPublic = false;
 }

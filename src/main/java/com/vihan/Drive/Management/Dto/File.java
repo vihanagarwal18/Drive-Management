@@ -27,4 +27,14 @@ public class File {
     private String internalPath;
 
     private String externalPath;
+    
+    private String s3Key;
+    
+    private String contentType;
+    
+    private Long size;
+    
+    private Boolean isPublic;
+    
+    private String presignedUrl;
 }
