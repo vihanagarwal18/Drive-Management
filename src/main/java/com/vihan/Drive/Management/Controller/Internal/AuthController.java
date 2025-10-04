@@ -3,6 +3,7 @@ package com.vihan.Drive.Management.Controller.Internal;
 import com.vihan.Drive.Management.Dto.AuthRequest;
 import com.vihan.Drive.Management.Dto.AuthResponse;
 import com.vihan.Drive.Management.Dto.AuthTypeRequest;
+import com.vihan.Drive.Management.Dto.PasswordResetRequest;
 import com.vihan.Drive.Management.Dto.RegisterRequest;
 import com.vihan.Drive.Management.Dto.TokenValidationResponse;
 import com.vihan.Drive.Management.Service.Interface.AuthService;
@@ -82,10 +83,20 @@ public class AuthController {
     @PostMapping("/forgot-password/{username}")
     public ResponseEntity<String> forgotPassword(@PathVariable String username) {
         try {
-            String email = authService.forgotPassword(username);
-            return ResponseEntity.ok(email);
+            authService.forgotPassword(username);
+            return ResponseEntity.ok("Password reset email sent");
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequest request) {
+        try {
+            authService.resetPassword(request.getToken(), request.getPassword());
+            return ResponseEntity.ok("Password reset successful");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

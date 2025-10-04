@@ -17,27 +17,28 @@ public class EmailServiceImpl implements EmailService {
     private JavaMailSender mailSender;
 
     @Override
-    public void sendPasswordEmail(String to, String password, String username) {
+    public void sendPasswordResetEmail(String to, String token, String username) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(to);
-            helper.setSubject("Your Password for Drive Management");
+            helper.setSubject("Password Reset Request for Drive Management");
 
+            String url = "http://localhost:3000/reset-password?token=" + token;
             String htmlContent = "<html>"
                     + "<body style='font-family: Arial, sans-serif; color: #333;'>"
                     + "<div style='margin: auto; max-width: 600px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>"
                     + "<div style='text-align: center;'>"
                     + "<img src='cid:logo' alt='Drive Management Logo' style='width: 150px; height: auto;'/>"
                     + "</div>"
-                    + "<h2 style='color: #007bff;'>Your Password for Drive Management</h2>"
+                    + "<h2 style='color: #007bff;'>Password Reset Request</h2>"
                     + "<p>Hello, <strong>" + username + "</strong>!</p>"
-                    + "<p>Your password has been successfully retrieved. Please keep it safe and do not share it with anyone.</p>"
-                    + "<p style='background-color: #f2f2f2; padding: 10px; border-radius: 5px;'>"
-                    + "<strong>Password:</strong> " + password
+                    + "<p>We received a request to reset your password. Click the link below to reset it:</p>"
+                    + "<p style='text-align: center;'>"
+                    + "<a href='" + url + "' style='display: inline-block; padding: 10px 20px; color: #fff; background-color: #007bff; border-radius: 5px; text-decoration: none;'>Reset Password</a>"
                     + "</p>"
-                    + "<p>If you did not request this, please contact our support team immediately.</p>"
+                    + "<p>If you did not request a password reset, please ignore this email.</p>"
                     + "<hr>"
                     + "<p style='font-size: 0.8em; color: #777; text-align: center;'>"
                     + "&copy; 2025 Drive Management. All rights reserved."

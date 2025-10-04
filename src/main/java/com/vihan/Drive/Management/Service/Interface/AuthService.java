@@ -18,5 +18,7 @@ public interface AuthService {
 
     void deleteUser(String userId);
 
-    String forgotPassword(String username);
+    void forgotPassword(String username);
+
+    void resetPassword(String token, String password);
 }

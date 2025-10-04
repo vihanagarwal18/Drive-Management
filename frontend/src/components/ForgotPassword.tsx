@@ -26,8 +26,7 @@ const ForgotPassword = () => {
         const errorText = await response.text();
         throw new Error(errorText || 'Failed to send password reset email');
       } else {
-        const email = await response.text();
-        setMessage(`Shortly a mail would be sent to ${email}, if not sent in 5 mins contact drive.management.vihan@gmail.com`);
+        setMessage(`A password reset link has been sent to your email address.`);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send password reset email. Please try again.');
@@ -41,7 +40,7 @@ const ForgotPassword = () => {
       {loading && <Loading />}
       <div className="login-box">
         <h2>Forgot Password</h2>
-        <p>Enter your username to receive your password.</p>
+        <p>Enter your username to receive a password reset link.</p>
         <form onSubmit={handleForgotPassword}>
           <input
             type="text"

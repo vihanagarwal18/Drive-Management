@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Home from './components/Home';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import Loading from './components/Loading';
 import './App.css';
 
@@ -88,6 +89,7 @@ function App() {
             }
           />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/register"
             element={

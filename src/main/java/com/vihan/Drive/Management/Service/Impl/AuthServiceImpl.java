@@ -4,9 +4,11 @@ import com.vihan.Drive.Management.Dto.AuthRequest;
 import com.vihan.Drive.Management.Dto.AuthResponse;
 import com.vihan.Drive.Management.Dto.RegisterRequest;
 import com.vihan.Drive.Management.Entity.AuthUserModel;
+import com.vihan.Drive.Management.Entity.PasswordResetToken;
 import com.vihan.Drive.Management.Entity.UserModel;
 import com.vihan.Drive.Management.Mapper.UserMapper;
 import com.vihan.Drive.Management.Repository.AuthRepository;
+import com.vihan.Drive.Management.Repository.PasswordResetTokenRepository;
 import com.vihan.Drive.Management.Repository.RefreshTokenRepository;
 import com.vihan.Drive.Management.Repository.UserRepository;
 import com.vihan.Drive.Management.Security.CryptoUtil;
@@ -23,6 +25,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 @Slf4j
@@ -33,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EncryptService encryptService;
     private final DecryptService decryptService;
     private final JwtUtil jwtUtil;
@@ -216,7 +221,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public String forgotPassword(String username) {
+    public void forgotPassword(String username) {
         try {
             UserModel userModel = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
@@ -224,11 +229,14 @@ public class AuthServiceImpl implements AuthService {
             AuthUserModel authUserModel = authRepository.findByUser(userModel)
                     .orElseThrow(() -> new RuntimeException("Auth user not found for username: " + username));
 
-            String password = passwordService.decryptPassword(authUserModel.getEncryptedPassword());
+            String token = UUID.randomUUID().toString();
+            PasswordResetToken passwordResetToken = new PasswordResetToken();
+            passwordResetToken.setToken(token);
+            passwordResetToken.setAuthUser(authUserModel);
+            passwordResetToken.setExpiryDate(calculateExpiryDate(24 * 60));
+            passwordResetTokenRepository.save(passwordResetToken);
 
-            emailService.sendPasswordEmail(userModel.getEmail(), password, userModel.getUsername());
-
-            return userModel.getEmail();
+            emailService.sendPasswordResetEmail(userModel.getEmail(), token, userModel.getUsername());
 
         } catch (UsernameNotFoundException e) {
             log.error("User not found with username: " + username, e);
@@ -237,5 +245,36 @@ public class AuthServiceImpl implements AuthService {
             log.error("Failed to send password email for username: " + username, e);
             throw new RuntimeException("Failed to send password email for username: " + username, e);
         }
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String password) {
+        try {
+            PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token);
+            if (passwordResetToken == null) {
+                throw new RuntimeException("Invalid password reset token");
+            }
+
+            if (passwordResetToken.getExpiryDate().before(new Date())) {
+                throw new RuntimeException("Password reset token has expired");
+            }
+
+            AuthUserModel authUserModel = passwordResetToken.getAuthUser();
+            authUserModel.setEncryptedPassword(passwordService.encryptPassword(password));
+            authRepository.save(authUserModel);
+
+            passwordResetTokenRepository.delete(passwordResetToken);
+        } catch (Exception e) {
+            log.error("Failed to reset password", e);
+            throw new RuntimeException("Failed to reset password", e);
+        }
+    }
+
+    private Date calculateExpiryDate(int minutes) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.MINUTE, minutes);
+        return new Date(cal.getTime().getTime());
     }
 }
