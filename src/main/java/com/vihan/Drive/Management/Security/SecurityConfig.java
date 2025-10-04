@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/internal/v1/auth/login").permitAll()
                 .requestMatchers("/internal/v1/auth/register").permitAll()
+                .requestMatchers("/internal/v1/auth/forgot-password/**").permitAll()
                 .requestMatchers("/internal/v1/auth/delete/**").authenticated()
                 .requestMatchers("/public/v1/file/**").authenticated()
                 .requestMatchers("/public/v1/files/**").authenticated()

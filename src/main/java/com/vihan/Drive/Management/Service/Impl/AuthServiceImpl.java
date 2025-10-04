@@ -14,6 +14,7 @@ import com.vihan.Drive.Management.Security.JwtUtil;
 import com.vihan.Drive.Management.Security.PasswordService;
 import com.vihan.Drive.Management.Service.Interface.AuthService;
 import com.vihan.Drive.Management.Service.Interface.DecryptService;
+import com.vihan.Drive.Management.Service.Interface.EmailService;
 import com.vihan.Drive.Management.Service.Interface.EncryptService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordService passwordService;
     private final CryptoUtil cryptoUtil;
+    private final EmailService emailService;
 
     @Override
     public boolean isAuthenticated(String passwordEntered, String userId) {
@@ -209,6 +211,31 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             log.error("Failed to delete user with id: " + userId, e);
             throw new RuntimeException("Failed to delete user with id: " + userId, e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public String forgotPassword(String username) {
+        try {
+            UserModel userModel = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+            AuthUserModel authUserModel = authRepository.findByUser(userModel)
+                    .orElseThrow(() -> new RuntimeException("Auth user not found for username: " + username));
+
+            String password = passwordService.decryptPassword(authUserModel.getEncryptedPassword());
+
+            emailService.sendPasswordEmail(userModel.getEmail(), password);
+
+            return userModel.getEmail();
+
+        } catch (UsernameNotFoundException e) {
+            log.error("User not found with username: " + username, e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to send password email for username: " + username, e);
+            throw new RuntimeException("Failed to send password email for username: " + username, e);
         }
     }
 }

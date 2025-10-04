@@ -17,4 +17,6 @@ public interface AuthService {
     String generateToken(String userId);
 
     void deleteUser(String userId);
+
+    String forgotPassword(String username);
 }

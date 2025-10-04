@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Home from './components/Home';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
 import './App.css';
 
 function App() {
@@ -30,6 +33,11 @@ function App() {
     setUserId(userId);
   };
 
+  const handleRegister = (userId: string) => {
+    setIsAuthenticated(true);
+    setUserId(userId);
+  };
+
   const handleLogout = async () => {
     try {
       await fetch('/internal/v1/auth/logout', { method: 'POST' });
@@ -51,13 +59,39 @@ function App() {
   };
 
   return (
-    <div className="App">
-      {isAuthenticated ? (
-        <Home onLogout={handleLogout} onDeleteAccount={handleDeleteAccount} />
-      ) : (
-        <Login onLogin={handleLogin} />
-      )}
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Home onLogout={handleLogout} onDeleteAccount={handleDeleteAccount} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? <Navigate to="/" /> : <Login onLogin={handleLogin} />
+            }
+          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/register"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/" />
+              ) : (
+                <Register onRegister={handleRegister} />
+              )
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
