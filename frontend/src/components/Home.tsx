@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
+import { Link, Outlet } from 'react-router-dom';
 import Loading from './Loading';
 import './Home.css';
 
 interface HomeProps {
+  username: string;
   onLogout: () => void;
   onDeleteAccount: () => void;
+  isDarkMode: boolean;
 }
 
-const Home: React.FC<HomeProps> = ({ onLogout, onDeleteAccount }) => {
+const Home: React.FC<HomeProps> = ({ username, onLogout, onDeleteAccount, isDarkMode }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
@@ -21,22 +24,26 @@ const Home: React.FC<HomeProps> = ({ onLogout, onDeleteAccount }) => {
   };
 
   return (
-    <div className="home-container">
+    <div className={`home-container ${isDarkMode ? 'dark-mode' : ''}`}>
       {loading && <Loading />}
       <nav className="sidebar">
         <div className="sidebar-header">
           <h3>Lenk</h3>
         </div>
+        <div className="user-profile">
+          <i className="fas fa-user-circle"></i>
+          <span>Hello, {username}</span>
+        </div>
         <ul>
           <li>
-            <a href="#">
+            <Link to="/">
               <i className="fas fa-home"></i> HOME
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#">
+            <Link to="/settings">
               <i className="fas fa-cog"></i> SETTING
-            </a>
+            </Link>
           </li>
         </ul>
         <div className="sidebar-footer">
@@ -56,10 +63,9 @@ const Home: React.FC<HomeProps> = ({ onLogout, onDeleteAccount }) => {
       </nav>
       <main className="main-content">
         <header>
-          <input type="search" placeholder="Search..." />
         </header>
         <section className="content">
-          {/* Add your main content here */}
+          <Outlet />
         </section>
       </main>
     </div>

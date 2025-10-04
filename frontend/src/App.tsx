@@ -6,12 +6,16 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Loading from './components/Loading';
+import Settings from './components/Settings';
+import HomeContent from './components/HomeContent';
 import './App.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -22,6 +26,7 @@ function App() {
           if (data.valid) {
             setIsAuthenticated(true);
             setUserId(data.userId);
+            setUsername(data.username);
           }
         }
       } catch (error) {
@@ -76,12 +81,15 @@ function App() {
             path="/"
             element={
               isAuthenticated ? (
-                <Home onLogout={handleLogout} onDeleteAccount={handleDeleteAccount} />
+                <Home username={username} onLogout={handleLogout} onDeleteAccount={handleDeleteAccount} isDarkMode={isDarkMode} />
               ) : (
                 <Navigate to="/login" />
               )
             }
-          />
+          >
+            <Route index element={<HomeContent userId={userId} />} />
+            <Route path="settings" element={<Settings isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />} />
+          </Route>
           <Route
             path="/login"
             element={
