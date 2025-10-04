@@ -24,7 +24,7 @@ const ForgotPassword = () => {
         throw new Error(errorText || 'Failed to send password reset email');
       } else {
         const email = await response.text();
-        setMessage(email);
+        setMessage(`Shortly a mail would be sent to ${email}, if not sent in 5 mins contact drive.management.vihan@gmail.com`);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send password reset email. Please try again.');

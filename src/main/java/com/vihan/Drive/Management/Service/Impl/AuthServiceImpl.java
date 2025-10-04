@@ -226,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
 
             String password = passwordService.decryptPassword(authUserModel.getEncryptedPassword());
 
-            emailService.sendPasswordEmail(userModel.getEmail(), password);
+            emailService.sendPasswordEmail(userModel.getEmail(), password, userModel.getUsername());
 
             return userModel.getEmail();
 

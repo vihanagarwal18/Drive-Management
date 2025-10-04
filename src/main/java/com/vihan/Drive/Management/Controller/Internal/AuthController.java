@@ -83,7 +83,7 @@ public class AuthController {
     public ResponseEntity<String> forgotPassword(@PathVariable String username) {
         try {
             String email = authService.forgotPassword(username);
-            return ResponseEntity.ok("Password sent to " + email);
+            return ResponseEntity.ok(email);
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
