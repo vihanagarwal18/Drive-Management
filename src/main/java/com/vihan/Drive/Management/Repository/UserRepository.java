@@ -1,10 +1,19 @@
 package com.vihan.Drive.Management.Repository;
 
-import com.vihan.Drive.Management.Dto.User;
+import com.vihan.Drive.Management.Entity.UserModel;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface UserRepository {
+import java.util.Optional;
 
-    User getUser(String id);
+@Repository
+public interface UserRepository extends JpaRepository<UserModel, String> {
+
+    Optional<UserModel> findByUsername(String username);
+
+    boolean existsByUsername(String username);
+
+    Optional<UserModel> findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }

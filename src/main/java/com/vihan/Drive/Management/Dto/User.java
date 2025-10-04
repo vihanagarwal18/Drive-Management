@@ -1,16 +1,14 @@
 package com.vihan.Drive.Management.Dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
-@Getter
-@Setter
+@Builder
 public class User {
 
     private String id;
@@ -28,5 +26,4 @@ public class User {
     private String encryptionKey;
 
     private String decryptionKey;
-
 }

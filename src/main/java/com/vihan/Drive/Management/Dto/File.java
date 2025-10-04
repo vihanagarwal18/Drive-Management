@@ -3,16 +3,12 @@ package com.vihan.Drive.Management.Dto;
 import com.vihan.Drive.Management.Constants.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
-@Getter
-@Setter
 @Builder
 public class File {
 
@@ -29,4 +25,14 @@ public class File {
     private String internalPath;
 
     private String externalPath;
+    
+    private String s3Key;
+    
+    private String contentType;
+    
+    private Long size;
+    
+    private Boolean isPublic;
+    
+    private String presignedUrl;
 }
