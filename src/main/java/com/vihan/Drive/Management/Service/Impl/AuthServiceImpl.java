@@ -2,15 +2,12 @@ package com.vihan.Drive.Management.Service.Impl;
 
 import com.vihan.Drive.Management.Dto.AuthRequest;
 import com.vihan.Drive.Management.Dto.AuthResponse;
-import com.vihan.Drive.Management.Dto.AuthUser;
-import com.vihan.Drive.Management.Dto.LoginDetails;
 import com.vihan.Drive.Management.Dto.RegisterRequest;
-import com.vihan.Drive.Management.Dto.User;
 import com.vihan.Drive.Management.Entity.AuthUserModel;
 import com.vihan.Drive.Management.Entity.UserModel;
-import com.vihan.Drive.Management.Mapper.AuthUserMapper;
 import com.vihan.Drive.Management.Mapper.UserMapper;
 import com.vihan.Drive.Management.Repository.AuthRepository;
+import com.vihan.Drive.Management.Repository.RefreshTokenRepository;
 import com.vihan.Drive.Management.Repository.UserRepository;
 import com.vihan.Drive.Management.Security.CryptoUtil;
 import com.vihan.Drive.Management.Security.JwtUtil;
@@ -25,7 +22,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -35,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final EncryptService encryptService;
     private final DecryptService decryptService;
     private final JwtUtil jwtUtil;
@@ -197,6 +194,21 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             log.error("Failed to generate encryption key", e);
             throw new RuntimeException("Failed to generate encryption key", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(String userId) {
+        try {
+            UserModel user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+            refreshTokenRepository.deleteByUser(user);
+            authRepository.deleteByUserId(userId);
+            userRepository.deleteById(userId);
+        } catch (Exception e) {
+            log.error("Failed to delete user with id: " + userId, e);
+            throw new RuntimeException("Failed to delete user with id: " + userId, e);
         }
     }
 }

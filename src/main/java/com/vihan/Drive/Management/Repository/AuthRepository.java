@@ -23,4 +23,6 @@ public interface AuthRepository extends JpaRepository<AuthUserModel, String> {
 
     @Query("SELECT COUNT(a) = 0 FROM AuthUserModel a WHERE a.decryptionKey = :decryptionKey")
     boolean checkDuplicateDecryptionKey(@Param("decryptionKey") String decryptionKey);
+
+    void deleteByUserId(String userId);
 }

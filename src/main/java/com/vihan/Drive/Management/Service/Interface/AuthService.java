@@ -3,9 +3,6 @@ package com.vihan.Drive.Management.Service.Interface;
 import com.vihan.Drive.Management.Dto.AuthRequest;
 import com.vihan.Drive.Management.Dto.AuthResponse;
 import com.vihan.Drive.Management.Dto.RegisterRequest;
-import com.vihan.Drive.Management.Dto.User;
-
-import java.util.List;
 
 public interface AuthService {
 
@@ -18,4 +15,6 @@ public interface AuthService {
     AuthResponse register(RegisterRequest request);
     
     String generateToken(String userId);
+
+    void deleteUser(String userId);
 }
