@@ -8,6 +8,7 @@ import ResetPassword from './components/ResetPassword';
 import Loading from './components/Loading';
 import Settings from './components/Settings';
 import HomeContent from './components/HomeContent';
+import About from './components/About';
 import './App.css';
 
 function App() {
@@ -89,6 +90,7 @@ function App() {
           >
             <Route index element={<HomeContent userId={userId} />} />
             <Route path="settings" element={<Settings isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />} />
+            <Route path="about" element={<About />} />
           </Route>
           <Route
             path="/login"

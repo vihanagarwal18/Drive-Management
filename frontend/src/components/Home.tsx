@@ -28,11 +28,11 @@ const Home: React.FC<HomeProps> = ({ username, onLogout, onDeleteAccount, isDark
       {loading && <Loading />}
       <nav className="sidebar">
         <div className="sidebar-header">
-          <h3>Lenk</h3>
+          <h3>Drive Management</h3>
         </div>
         <div className="user-profile">
           <i className="fas fa-user-circle"></i>
-          <span>Hello, {username}</span>
+          <span>{username}</span>
         </div>
         <ul>
           <li>
@@ -43,6 +43,11 @@ const Home: React.FC<HomeProps> = ({ username, onLogout, onDeleteAccount, isDark
           <li>
             <Link to="/settings">
               <i className="fas fa-cog"></i> SETTING
+            </Link>
+          </li>
+          <li>
+            <Link to="/about">
+              <i className="fas fa-info-circle"></i> ABOUT
             </Link>
           </li>
         </ul>
