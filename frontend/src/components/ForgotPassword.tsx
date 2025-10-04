@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Loading from './Loading';
 import './Login.css';
 
 const ForgotPassword = () => {
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setLoading(true);
     try {
       const response = await fetch(`/internal/v1/auth/forgot-password/${username}`, {
         method: 'POST',
@@ -28,11 +31,14 @@ const ForgotPassword = () => {
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send password reset email. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
+      {loading && <Loading />}
       <div className="login-box">
         <h2>Forgot Password</h2>
         <p>Enter your username to receive your password.</p>

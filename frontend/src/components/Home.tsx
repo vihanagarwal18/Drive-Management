@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Loading from './Loading';
 import './Home.css';
 
 interface HomeProps {
@@ -7,8 +8,21 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ onLogout, onDeleteAccount }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = () => {
+    setLoading(true);
+    onLogout();
+  };
+
+  const handleDeleteAccount = () => {
+    setLoading(true);
+    onDeleteAccount();
+  };
+
   return (
     <div className="home-container">
+      {loading && <Loading />}
       <nav className="sidebar">
         <div className="sidebar-header">
           <h3>Lenk</h3>
@@ -28,12 +42,12 @@ const Home: React.FC<HomeProps> = ({ onLogout, onDeleteAccount }) => {
         <div className="sidebar-footer">
           <ul>
             <li>
-              <a href="#" onClick={onLogout}>
+              <a href="#" onClick={handleLogout}>
                 <i className="fas fa-sign-out-alt"></i> LOGOUT
               </a>
             </li>
             <li>
-              <a href="#" onClick={onDeleteAccount}>
+              <a href="#" onClick={handleDeleteAccount}>
                 <i className="fas fa-trash"></i> DELETE ACCOUNT
               </a>
             </li>

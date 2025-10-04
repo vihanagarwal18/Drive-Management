@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Loading from './Loading';
 import './Login.css';
 import logo from '../logo.svg';
 
@@ -12,10 +13,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const response = await fetch('/internal/v1/auth/login', {
         method: 'POST',
@@ -33,11 +36,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       onLogin(data.userId);
     } catch (err) {
       setError('Invalid username or password');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
+      {loading && <Loading />}
       <div className="login-box">
         <img src={logo} className="logo" alt="logo" />
         <h2>Welcome back</h2>

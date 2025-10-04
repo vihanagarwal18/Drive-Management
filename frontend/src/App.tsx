@@ -4,11 +4,13 @@ import Login from './components/Login';
 import Home from './components/Home';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
+import Loading from './components/Loading';
 import './App.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -23,6 +25,8 @@ function App() {
         }
       } catch (error) {
         console.error('Token validation failed', error);
+      } finally {
+        setLoading(false);
       }
     };
     validateToken();
@@ -45,6 +49,8 @@ function App() {
       setUserId('');
     } catch (error) {
       console.error('Logout failed', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,12 +61,15 @@ function App() {
       setUserId('');
     } catch (error) {
       console.error('Account deletion failed', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Router>
       <div className="App">
+        {loading && <Loading />}
         <Routes>
           <Route
             path="/"
