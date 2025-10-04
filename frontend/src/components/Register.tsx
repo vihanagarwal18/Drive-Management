@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Loading from './Loading';
 import './Login.css';
 import logo from '../logo.svg';
 
@@ -17,6 +18,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
   const [address, setAddress] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +27,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
       setError('Passwords do not match');
       return;
     }
+    setLoading(true);
     try {
       const response = await fetch('/internal/v1/auth/register', {
         method: 'POST',
@@ -49,11 +52,14 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
       onRegister(data.userId);
     } catch (err) {
       setError('Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
+      {loading && <Loading />}
       <div className="login-box">
         <img src={logo} className="logo" alt="logo" />
         <h2>Create an Account</h2>
