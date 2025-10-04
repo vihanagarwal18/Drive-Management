@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Loading from './Loading';
+import PasswordField from './PasswordField';
 import './Login.css';
 import logo from '../logo.svg';
 
@@ -12,7 +13,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -57,21 +57,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-          <div className="password-container">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="enter password..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              maxLength={20}
-              required
-            />
-            <i
-              className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
-              onClick={() => setShowPassword(!showPassword)}
-            ></i>
-          </div>
-          <div className="char-counter">{password.length}/20</div>
+          <PasswordField
+            placeholder="enter password..."
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
           <button type="submit">Login</button>
         </form>
         <p>

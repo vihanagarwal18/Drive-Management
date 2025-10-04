@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Loading from './Loading';
+import PasswordField from './PasswordField';
 import './Login.css';
 import logo from '../logo.svg';
 
@@ -17,7 +18,6 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -98,36 +98,18 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-          <div className="password-container">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              maxLength={20}
-              required
-            />
-            <i
-              className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
-              onClick={() => setShowPassword(!showPassword)}
-            ></i>
-          </div>
-          <div className="char-counter">{password.length}/20</div>
-          <div className="password-container">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              maxLength={20}
-              required
-            />
-            <i
-              className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
-              onClick={() => setShowPassword(!showPassword)}
-            ></i>
-          </div>
-          <div className="char-counter">{confirmPassword.length}/20</div>
+          <PasswordField
+            placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <PasswordField
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
           <button type="submit">Submit</button>
         </form>
         <p>

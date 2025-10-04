@@ -35,23 +35,6 @@ form {
   flex-direction: column;
 }
 
-.password-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-container input {
-  width: 100%;
-  padding-right: 2.5rem;
-}
-
-.password-container i {
-  position: absolute;
-  right: 1rem;
-  cursor: pointer;
-  color: #999;
-}
 
 input {
   padding: 0.75rem;
@@ -79,12 +62,6 @@ button:hover {
   cursor: pointer;
 }
 
-.char-counter {
-  text-align: right;
-  font-size: 0.8rem;
-  color: #999;
-  margin-bottom: 1rem;
-}
 
 .error {
   color: red;
